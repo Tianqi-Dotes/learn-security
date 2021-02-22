@@ -2,6 +2,7 @@ package com.imooc.uaa.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.imooc.uaa.filter.RestAuthFilter;
+import com.imooc.uaa.security.UserDetailsServiceImp;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -32,6 +33,7 @@ import javax.annotation.Resource;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.Map;
 
@@ -52,6 +54,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     ObjectMapper objectMapper;
     @Resource
     SecurityProblemSupport securityProblemSupport;
+    @Resource
+    DataSource dataSource;
+    @Resource
+    UserDetailsServiceImp userDetailsServiceImp;
 
     @Override
     //controller 鉴权不需要csrf
@@ -105,14 +111,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication()
-            .withUser("user")
+        auth.userDetailsService(userDetailsServiceImp)
+            .passwordEncoder(passwordEncoder());
+
+    /*.jdbcAuthentication()
+            .dataSource(dataSource)
+            .usersByUsernameQuery("select username,password,enabled from mooc_users where username=?")
+            .passwordEncoder(passwordEncoder());*/
+        //.withDefaultSchema()
+            /*.withUser("user")
             .password("{bcrypt}$2a$10$t/z9qsfV906MWmcI93XFQuhvnc9aTHgw1t52QmQ.prlL8EKVQSG7u")
             .roles("USER","ADMIN")
         .and()
         .withUser("tq")
         .password("{SHA-1}{RP9fpmw4xQjOLVVW4z7YYKxkXgqAiE9TQc93IZusp1w=}12c76e6318fd7d8d5876e2f168e2e1c81a9a4ac2")
-        .roles("USER","ADMIN");
+        .roles("USER","ADMIN");*/
     }
     @Bean
     PasswordEncoder passwordEncoder(){
@@ -127,6 +140,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) throws Exception {//过滤不进入
-        web.ignoring().mvcMatchers("/static/**","/error");
+        web.ignoring().antMatchers("/static/**","/error","/h2-console/**");
     }
 }

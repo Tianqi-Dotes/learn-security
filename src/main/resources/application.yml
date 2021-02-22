@@ -28,6 +28,7 @@ spring:
     password: ""
     url: jdbc:h2:mem:test;MODE=MySQL;
     username: sa
+    initialization-mode: embedded
   h2:
     console:
       enabled: true
@@ -35,3 +36,8 @@ spring:
       settings:
         trace: false
         web-allow-others: false
+  jpa:
+    database: h2
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
